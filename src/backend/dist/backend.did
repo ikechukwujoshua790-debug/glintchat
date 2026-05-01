@@ -1,0 +1,245 @@
+type http_request_result = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type http_header = 
+ record {
+   name: text;
+   value: text;
+ };
+type _ImmutableObjectStorageRefillResult = 
+ record {
+   success: opt bool;
+   topped_up_amount: opt nat;
+ };
+type _ImmutableObjectStorageRefillInformation = record {
+                                                  proposed_top_up_amount:
+                                                   opt nat;};
+type _ImmutableObjectStorageCreateCertificateResult = 
+ record {
+   blob_hash: text;
+   method: text;
+ };
+type VerificationStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+ };
+type VerificationRequest = 
+ record {
+   receiptStorageKey: text;
+   status: VerificationStatus;
+   submittedAt: Timestamp;
+   userId: UserId;
+   verifiedAt: opt Timestamp;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   createdAt: Timestamp;
+   id: UserId;
+   isVerified: bool;
+   phone: text;
+   realName: text;
+ };
+type UserId = principal;
+type TransformationOutput = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type TransformationInput = 
+ record {
+   context: blob;
+   response: http_request_result;
+ };
+type Timestamp = int;
+type StripeSessionStatus = 
+ variant {
+   completed: record {
+                response: text;
+                userPrincipal: opt text;
+              };
+   failed: record {error: text;};
+ };
+type StripeConfiguration = 
+ record {
+   allowedCountries: vec text;
+   secretKey: text;
+ };
+type StatusPost = 
+ record {
+   authorId: UserId;
+   content: text;
+   createdAt: Timestamp;
+   expiresAt: Timestamp;
+   id: StatusId;
+ };
+type StatusId = nat;
+type PayoutStatus = 
+ variant {
+   pending;
+   processed;
+ };
+type PayoutRequest = 
+ record {
+   id: PaymentId;
+   requestedAt: Timestamp;
+   status: PayoutStatus;
+   totalAmount: nat;
+ };
+type PaymentId = nat;
+type MessageId = nat;
+type Message = 
+ record {
+   content: text;
+   id: MessageId;
+   mediaType: MediaType;
+   mediaUrl: opt text;
+   senderId: UserId;
+   timestamp: Timestamp;
+ };
+type MediaUploadCertificate = 
+ record {
+   blobHash: text;
+   method: text;
+ };
+type MediaType = 
+ variant {
+   audio;
+   image;
+   none;
+   video;
+ };
+type GroupMember = 
+ record {
+   isAdmin: bool;
+   joinedAt: Timestamp;
+   userId: UserId;
+ };
+type GroupId = nat;
+type Group = 
+ record {
+   createdAt: Timestamp;
+   creatorId: UserId;
+   id: GroupId;
+   members: vec GroupMember;
+   name: text;
+ };
+type ChannelPost = 
+ record {
+   authorId: UserId;
+   channelId: ChannelId;
+   content: text;
+   id: nat;
+   postedAt: Timestamp;
+ };
+type ChannelId = nat;
+type Channel = 
+ record {
+   createdAt: Timestamp;
+   description: text;
+   id: ChannelId;
+   name: text;
+ };
+type CallType = 
+ variant {
+   video;
+   voice;
+ };
+type CallRoom = 
+ record {
+   callType: CallType;
+   createdAt: Timestamp;
+   participants: vec UserId;
+   roomId: text;
+   roomUrl: text;
+ };
+service : {
+  _immutableObjectStorageBlobsAreLive: (hashes: vec blob) -> (vec bool) query;
+  _immutableObjectStorageBlobsToDelete: () -> (vec blob) query;
+  _immutableObjectStorageConfirmBlobDeletion: (blobs: vec blob) -> ();
+  _immutableObjectStorageCreateCertificate: (blobHash: text) ->
+   (_ImmutableObjectStorageCreateCertificateResult);
+  _immutableObjectStorageRefillCashier: (refillInformation:
+   opt _ImmutableObjectStorageRefillInformation) ->
+   (_ImmutableObjectStorageRefillResult);
+  _immutableObjectStorageUpdateGatewayPrincipals: () -> ();
+  _initializeAccessControl: () -> ();
+  addGroupMember: (groupId: GroupId, newMember: UserId) -> ();
+  adminApproveVerification: (userId: principal) -> (variant {
+                                                      err: text;
+                                                      ok;
+                                                    });
+  adminGetTotalRevenue: () -> (nat) query;
+  adminListPayoutRequests: () -> (vec PayoutRequest) query;
+  adminListUsers: () -> (vec UserProfile) query;
+  adminListVerificationRequests: () -> (vec VerificationRequest) query;
+  adminRejectVerification: (userId: principal) -> (variant {
+                                                     err: text;
+                                                     ok;
+                                                   });
+  adminRequestPayout: () -> (PayoutRequest);
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  createCallRoom: (recipientId: UserId, callType: CallType) ->
+   (variant {
+      err: text;
+      ok: CallRoom;
+    });
+  createChannel: (name: text, description: text) -> (Channel);
+  createCheckoutSession: (_items:
+   vec
+    record {
+      currency: text;
+      priceInCents: nat;
+      productDescription: text;
+      productName: text;
+      quantity: nat;
+    }, _successUrl: text, _cancelUrl: text) -> (text);
+  createGroup: (name: text) -> (Group);
+  createStatusPost: (content: text) -> (StatusPost);
+  deleteStatusPost: (postId: StatusId) -> ();
+  getActiveStatusPosts: () -> (vec StatusPost) query;
+  getCallRoom: (roomId: text) -> (opt CallRoom) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getChannelPosts: (channelId: ChannelId) -> (vec ChannelPost) query;
+  getDirectMessages: (otherUserId: UserId) -> (vec Message) query;
+  getGroup: (groupId: GroupId) -> (opt Group) query;
+  getGroupMessages: (groupId: GroupId) -> (vec Message) query;
+  getMediaDownloadUrl: (storageKey: text) -> (text);
+  getMyVerificationRequest: () -> (opt VerificationRequest) query;
+  getStripeSessionStatus: (_sessionId: text) -> (StripeSessionStatus);
+  getUserByPhone: (phone: text) -> (opt UserProfile) query;
+  getUserProfile: (userId: UserId) -> (opt UserProfile) query;
+  isCallerAdmin: () -> (bool) query;
+  isStripeConfigured: () -> (bool) query;
+  leaveGroup: (groupId: GroupId) -> ();
+  listChannels: () -> (vec Channel) query;
+  listMyGroups: () -> (vec Group) query;
+  postToChannel: (channelId: ChannelId, content: text) -> (ChannelPost);
+  registerUser: (realName: text, phone: text) -> ();
+  requestMediaUploadUrl: (blobHash: text) -> (MediaUploadCertificate);
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+  sendDirectMessage: (recipientId: UserId, content: text, mediaUrl: opt text,
+   mediaType: MediaType) -> (Message);
+  sendGroupMessage: (groupId: GroupId, content: text, mediaUrl: opt text,
+   mediaType: MediaType) -> (Message);
+  setDailyApiKey: (key: text) -> ();
+  setStripeConfiguration: (_config: StripeConfiguration) -> ();
+  submitVerificationRequest: (receiptStorageKey: text) ->
+   (variant {
+      err: text;
+      ok: VerificationRequest;
+    });
+  transform: (input: TransformationInput) -> (TransformationOutput) query;
+}

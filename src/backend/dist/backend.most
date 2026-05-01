@@ -1,0 +1,247 @@
+// Version: 3.0.0
+type CallRoom__832320919 =
+  {
+    callType : CallType__447539110;
+    createdAt : Timestamp__301639476;
+    participants : [UserId__158757552];
+    roomId : Text;
+    roomUrl : Text
+  };
+type CallType__447539110 = {#video; #voice};
+type ChannelId__821026820 = Nat;
+type ChannelPost__661703495 =
+  {
+    authorId : UserId__158757552;
+    channelId : ChannelId__821026820;
+    content : Text;
+    id : Nat;
+    postedAt : Timestamp__301639476
+  };
+type Channel__802422446 =
+  {
+    createdAt : Timestamp__301639476;
+    description : Text;
+    id : ChannelId__821026820;
+    name : Text
+  };
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type GroupId__338923360 = Nat;
+type GroupMember__748900587 =
+  {
+    isAdmin : Bool;
+    joinedAt : Timestamp__301639476;
+    userId : UserId__158757552
+  };
+type Group__1072160297 =
+  {
+    createdAt : Timestamp__301639476;
+    creatorId : UserId__158757552;
+    id : GroupId__338923360;
+    members : [GroupMember__748900587];
+    name : Text
+  };
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type List__415060402<T> = List__790383201<T>;
+type List__790383201<T> =
+  {
+    var blockIndex : Nat__490723111;
+    var blocks : [var [var ?T]];
+    var elementIndex : Nat__490723111
+  };
+type Map__158565046<K, V> = Map__297112838<K, V>;
+type Map__297112838<K, V> =
+  {var root : Node__46230540<K, V>; var size : Nat__490723111};
+type Map__605269027<K, V> = Map__158565046<K, V>;
+type MediaType__533637814 = {#audio; #image; #none; #video};
+type MessageId__291319400 = Nat;
+type Message__804209456 =
+  {
+    content : Text;
+    id : MessageId__291319400;
+    mediaType : MediaType__533637814;
+    mediaUrl : ?Text;
+    senderId : UserId__158757552;
+    timestamp : Timestamp__301639476
+  };
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type OldVerificationRecord__916960387 =
+  {
+    amountCents : Nat;
+    paidAt : Timestamp__301639476;
+    paymentId : Text;
+    userId : UserId__158757552
+  };
+type PaymentId__1028686908 = Nat;
+type PayoutRequest__541497120 =
+  {
+    id : PaymentId__1028686908;
+    requestedAt : Timestamp__301639476;
+    status : PayoutStatus__806788678;
+    totalAmount : Nat
+  };
+type PayoutStatus__806788678 = {#pending; #processed};
+type StatusId__1025338019 = Nat;
+type StatusPost__241599043 =
+  {
+    authorId : UserId__158757552;
+    content : Text;
+    createdAt : Timestamp__301639476;
+    expiresAt : Timestamp__301639476;
+    id : StatusId__1025338019
+  };
+type Timestamp__301639476 = Int;
+type UserId__158757552 = Principal;
+type UserProfile__277265826 =
+  {
+    createdAt : Timestamp__301639476;
+    id : UserId__158757552;
+    isVerified : Bool;
+    phone : Text;
+    realName : Text
+  };
+type UserRole__1073662873 = {#admin; #guest; #user};
+type VerificationRequest__97372712 =
+  {
+    receiptStorageKey : Text;
+    status : VerificationStatus__773167845;
+    submittedAt : Timestamp__301639476;
+    userId : UserId__158757552;
+    verifiedAt : ?Timestamp__301639476
+  };
+type VerificationStatus__773167845 = {#approved; #pending; #rejected};
+actor ({
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable callRooms :
+    {
+      var root : Node__46230540<Text, CallRoom__832320919>;
+      var size : Nat__490723111
+    };
+  stable channelPosts :
+    {
+      var root :
+        Node__46230540<ChannelId__821026820,
+                        List__415060402<ChannelPost__661703495>>;
+      var size : Nat__490723111
+    };
+  stable channels :
+    {
+      var root : Node__46230540<ChannelId__821026820, Channel__802422446>;
+      var size : Nat__490723111
+    };
+  stable dailyApiKeyRef : {var value : ?Text};
+  in directMessages :
+    Map__605269027<Text, List__415060402<Message__804209456>>;
+  in groupMessages :
+    Map__605269027<GroupId__338923360, List__415060402<Message__804209456>>;
+  stable groups :
+    {
+      var root : Node__46230540<GroupId__338923360, Group__1072160297>;
+      var size : Nat__490723111
+    };
+  stable var nextChannelId : Nat;
+  stable var nextChannelPostId : Nat;
+  stable var nextGroupId : Nat;
+  stable var nextMsgId : Nat;
+  stable var nextPayoutId : Nat;
+  stable var nextStatusId : Nat;
+  in objectStorageState : {var authorizedPrincipals : [Principal]};
+  stable payoutRequests :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?PayoutRequest__541497120]];
+      var elementIndex : Nat__490723111
+    };
+  stable statusPosts :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?StatusPost__241599043]];
+      var elementIndex : Nat__490723111
+    };
+  in var stripeConfig : ?{allowedCountries : [Text]; secretKey : Text};
+  stable userProfiles :
+    {
+      var root : Node__46230540<UserId__158757552, UserProfile__277265826>;
+      var size : Nat__490723111
+    };
+  in verificationRecords : List__415060402<OldVerificationRecord__916960387>
+}, {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable callRooms :
+    {
+      var root : Node__46230540<Text, CallRoom__832320919>;
+      var size : Nat__490723111
+    };
+  stable channelPosts :
+    {
+      var root :
+        Node__46230540<ChannelId__821026820,
+                        List__415060402<ChannelPost__661703495>>;
+      var size : Nat__490723111
+    };
+  stable channels :
+    {
+      var root : Node__46230540<ChannelId__821026820, Channel__802422446>;
+      var size : Nat__490723111
+    };
+  stable dailyApiKeyRef : {var value : ?Text};
+  stable directMessages :
+    {
+      var root : Node__46230540<Text, List__415060402<Message__804209456>>;
+      var size : Nat__490723111
+    };
+  stable groupMessages :
+    {
+      var root :
+        Node__46230540<GroupId__338923360,
+                        List__415060402<Message__804209456>>;
+      var size : Nat__490723111
+    };
+  stable groups :
+    {
+      var root : Node__46230540<GroupId__338923360, Group__1072160297>;
+      var size : Nat__490723111
+    };
+  stable var nextChannelId : Nat;
+  stable var nextChannelPostId : Nat;
+  stable var nextGroupId : Nat;
+  stable var nextMsgId : Nat;
+  stable var nextPayoutId : Nat;
+  stable var nextStatusId : Nat;
+  stable payoutRequests :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?PayoutRequest__541497120]];
+      var elementIndex : Nat__490723111
+    };
+  stable statusPosts :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?StatusPost__241599043]];
+      var elementIndex : Nat__490723111
+    };
+  stable userProfiles :
+    {
+      var root : Node__46230540<UserId__158757552, UserProfile__277265826>;
+      var size : Nat__490723111
+    };
+  stable verificationRequests :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?VerificationRequest__97372712]];
+      var elementIndex : Nat__490723111
+    }
+});

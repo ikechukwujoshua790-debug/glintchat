@@ -1,0 +1,29 @@
+{
+  "overview": "GlintChat is a privacy-focused, real-identity chat app with direct and group messaging, 24-hour status updates, official channels, and a private admin earnings dashboard. Users sign up with their real name and phone number only. Features include voice message recording with playback, photo/video sharing, live voice/video calling, and a $6 Stripe verification badge.",
+  "features": [
+    "Real-identity signup with real name and phone number — no usernames",
+    "Direct messaging and group chats",
+    "Voice message recording (hold-to-record, release-to-send) with play bar in chat bubbles",
+    "Photo and video sharing from device gallery with persistent storage",
+    "Live voice and video calling via Daily.co or Agora",
+    "24-hour status posts that auto-expire",
+    "Official Channels with admin-only posting",
+    "Get Verified page with $6 Stripe payment and automatic blue checkmark",
+    "Private Earnings Dashboard for admin with payout request",
+    "Admin-only access control enforced by account principal check",
+    "Privacy policy: no tracking, selling, or analyzing user data"
+  ],
+  "category": "communication",
+  "tags": [
+    "chat",
+    "messaging",
+    "voice-messages",
+    "media-sharing",
+    "video-calls",
+    "privacy",
+    "real-identity",
+    "stripe",
+    "admin-dashboard"
+  ],
+  "last_updated": "2026-04-28T19:27:05.032Z"
+}
